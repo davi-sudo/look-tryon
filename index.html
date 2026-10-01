@@ -25,8 +25,7 @@
     /* API BAR */
     .api-bar { position:fixed; top:61px; left:0; right:0; z-index:190; background:var(--black); color:var(--white); padding:9px 40px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     .api-bar label { font-size:.65rem; letter-spacing:2px; text-transform:uppercase; opacity:.5; white-space:nowrap; }
-    .api-bar select { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.25); color:var(--white); font-size:.72rem; padding:3px 6px; cursor:pointer; outline:none; }
-    .api-bar select option { background:var(--black); }
+    .api-fixed { font-size:.68rem; letter-spacing:2px; text-transform:uppercase; opacity:.85; white-space:nowrap; }
     .api-bar input { flex:1; min-width:220px; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.25); color:var(--white); font-size:.72rem; padding:3px 0; outline:none; }
     .api-bar input::placeholder { opacity:.3; }
     .api-bar button { background:var(--white); color:var(--black); border:none; padding:5px 14px; font-size:.62rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
@@ -188,11 +187,8 @@
 <!-- API BAR -->
 <div class="api-bar">
   <label>IA</label>
-  <select id="provider" onchange="onProviderChange()">
-    <option value="gemini">Gemini</option>
-    <option value="hf">HuggingFace</option>
-  </select>
-  <input type="password" id="apiKey" placeholder="Cole sua chave aqui..." />
+  <span class="api-fixed">HuggingFace</span>
+  <input type="password" id="apiKey" placeholder="hf_... (huggingface.co/settings/tokens)" />
   <button onclick="saveKey()">Salvar</button>
   <span id="keyStatus"></span>
 </div>
@@ -242,7 +238,7 @@
 <!-- FOOTER -->
 <footer>
   <span class="footer-logo">Stylefit</span>
-  <p>Powered by Gemini AI & HuggingFace · Protótipo</p>
+  <p>Powered by HuggingFace · Protótipo</p>
 </footer>
 
 <!-- FAB -->
@@ -364,28 +360,19 @@ const products = [
 let selProduct = null, userB64 = null, userMime = null, resultUrl = null;
 
 /* ─── API KEY ─── */
-function onProviderChange() {
-  const p = document.getElementById('provider').value;
-  document.getElementById('apiKey').placeholder = p === 'gemini'
-    ? 'AIzaSy... (aistudio.google.com/apikey)'
-    : 'hf_... (huggingface.co/settings/tokens)';
-  document.getElementById('apiKey').value = '';
-  document.getElementById('keyStatus').textContent = '';
-}
-
 function saveKey() {
   const v = document.getElementById('apiKey').value.trim();
-  const p = document.getElementById('provider').value;
-  if (!v || v.length < 8) { alert('Cole uma chave válida.'); return; }
-  localStorage.setItem('sf_provider', p);
-  localStorage.setItem('sf_key_' + p, v);
+  if (!v.startsWith('hf_') || v.length < 12) {
+    alert('Cole uma chave válida do HuggingFace (começa com hf_...).\n\nCrie em: huggingface.co/settings/tokens');
+    return;
+  }
+  localStorage.setItem('sf_key_hf', v);
   document.getElementById('keyStatus').className = 'api-ok';
   document.getElementById('keyStatus').textContent = '✓ salva';
 }
 
 function getKey() {
-  const p = document.getElementById('provider').value;
-  return localStorage.getItem('sf_key_' + p) || document.getElementById('apiKey').value.trim() || null;
+  return localStorage.getItem('sf_key_hf') || document.getElementById('apiKey').value.trim() || null;
 }
 
 /* ─── RENDER ─── */
@@ -498,8 +485,7 @@ const loadMsgs = ["Analisando sua silhueta...","Adaptando as peças ao seu corpo
 
 async function generate() {
   const key = getKey();
-  const prov = document.getElementById('provider').value;
-  if (!key) { showErr('Configure sua API Key na barra preta no topo.'); return; }
+  if (!key) { showErr('Configure sua API Key do HuggingFace na barra preta no topo.'); return; }
   if (!userB64) { showErr('Envie sua foto primeiro.'); return; }
   if (!selProduct) { showErr('Selecione um look no catálogo.'); return; }
 
@@ -508,11 +494,7 @@ async function generate() {
   const iv = setInterval(() => { document.getElementById('loadMsg').textContent = loadMsgs[++mi % loadMsgs.length]; }, 2200);
 
   try {
-    if (prov === 'hf') {
-      await genHF(key);
-    } else {
-      await genGemini(key);
-    }
+    await genHF(key);
     clearInterval(iv);
   } catch(err) {
     clearInterval(iv);
@@ -521,53 +503,57 @@ async function generate() {
   }
 }
 
+const HF_MODELS = ['timbrooks/instruct-pix2pix', 'yhyu13/instruct-pix2pix', 'diffusers/stable-diffusion-img2img'];
+
 async function genHF(key) {
   document.getElementById('loadMsg').textContent = 'Enviando para HuggingFace...';
-  const res = await fetch('https://api-inference.huggingface.co/models/timbrooks/instruct-pix2pix', {
-    method:'POST',
-    headers:{ Authorization:`Bearer ${key}`, 'Content-Type':'application/json', 'x-wait-for-model':'true', 'X-Use-Cache':'false' },
-    body: JSON.stringify({
-      inputs: userB64,
-      parameters: { prompt: selProduct.hf, negative_prompt:'blurry, low quality, bad anatomy', num_inference_steps:25, image_guidance_scale:1.5, guidance_scale:8 }
-    })
-  });
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error('HuggingFace: ' + (e.error||'Modelo ocupado. Aguarde 30s e tente novamente.')); }
-  const blob = await res.blob();
-  if (!blob.type.startsWith('image/')) { const t = await blob.text(); throw new Error('HF não retornou imagem: ' + t.slice(0,120)); }
-  resultUrl = await new Promise((r,rj) => { const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.onerror=rj; fr.readAsDataURL(blob); });
-  showResult();
-}
 
-async function genGemini(key) {
-  const models = ['gemini-2.0-flash-exp','gemini-2.0-flash-preview-image-generation'];
+  const payload = {
+    inputs: userB64,
+    parameters: {
+      prompt: selProduct.hf,
+      negative_prompt: 'blurry, low quality, bad anatomy, deformed, extra limbs, cartoon, drawing',
+      num_inference_steps: 25,
+      image_guidance_scale: 1.5,
+      guidance_scale: 8
+    }
+  };
+
   let lastErr = '';
-  for (const m of models) {
-    document.getElementById('loadMsg').textContent = `Processando com ${m}...`;
+
+  for (const model of HF_MODELS) {
+    document.getElementById('loadMsg').textContent = `Processando com ${model}...`;
+
+    const isDiffusers = !model.includes('instruct-pix2pix');
+    const headers = { Authorization:`Bearer ${key}`, 'Content-Type':'application/json', 'X-Use-Cache':'false' };
+    const body = isDiffusers
+      ? { inputs: userB64, parameters: { ...payload.parameters, strength: 0.45 } }
+      : payload;
+
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          contents:[{parts:[
-            {text: selProduct.prompt},
-            {inline_data:{mime_type:userMime, data:userB64}},
-            {text:'Esta é a foto da pessoa. Gere a imagem com o look aplicado.'}
-          ]}],
-          generationConfig:{responseModalities:['TEXT','IMAGE'],temperature:0.35,topP:0.9}
-        })
+      const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+        method:'POST', headers, body: JSON.stringify(body)
       });
-      if (!res.ok) { const e=await res.json(); lastErr=`[${m}] ${e.error?.message||'HTTP '+res.status}`; continue; }
-      const data = await res.json();
-      const parts = data.candidates?.[0]?.content?.parts||[];
-      for (const pt of parts) {
-        if (pt.inline_data?.mime_type?.startsWith('image/')) {
-          resultUrl = `data:${pt.inline_data.mime_type};base64,${pt.inline_data.data}`;
-          showResult(); return;
-        }
-      }
-      lastErr = `[${m}] IA não gerou imagem`;
-    } catch(e) { lastErr = `[${m}] ${e.message}`; }
+
+      if (res.status === 503) { lastErr = `[${model}] Modelo carregando. Aguarde ~20s e tente novamente.`; continue; }
+      if (res.status === 429) { lastErr = `[${model}] Limite de requisições atingido. Aguarde um pouco.`; continue; }
+      if (res.status === 402 || res.status === 403) { throw new Error('Chave recusada pelo HuggingFace. Verifique se o token tem permissão de inferência e se há créditos na conta.'); }
+
+      if (!res.ok) { const e = await res.json().catch(()=>({})); lastErr = `[${model}] ${e.error || 'HTTP ' + res.status}`; continue; }
+
+      const blob = await res.blob();
+      if (!blob.type.startsWith('image/')) { const t = await blob.text(); lastErr = `[${model}] Não retornou imagem: ` + t.slice(0,120); continue; }
+
+      resultUrl = await new Promise((r,rj) => { const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.onerror=rj; fr.readAsDataURL(blob); });
+      showResult();
+      return;
+
+    } catch(e) {
+      lastErr = `[${model}] ${e.message}`;
+    }
   }
-  throw new Error(lastErr || 'Todos os modelos falharam. Verifique a API Key e a fatura do projeto.');
+
+  throw new Error(lastErr + '\n\nSe persistir: huggingface.co/settings/tokens — crie um token do tipo "Read" e confira se o cartão tem saldo.');
 }
 
 function showResult() {
@@ -592,14 +578,8 @@ function showErr(m) { const el=document.getElementById('errMsg'); el.textContent
 
 /* ─── INIT ─── */
 window.addEventListener('load', () => {
-  const savedP = localStorage.getItem('sf_provider');
-  if (savedP) {
-    document.getElementById('provider').value = savedP;
-    const k = localStorage.getItem('sf_key_' + savedP);
-    if (k) { document.getElementById('apiKey').value=k; document.getElementById('keyStatus').className='api-ok'; document.getElementById('keyStatus').textContent='✓ salva'; }
-  }
-  onProviderChange();
-  if (savedP) document.getElementById('provider').value = savedP;
+  const k = localStorage.getItem('sf_key_hf');
+  if (k) { document.getElementById('apiKey').value=k; document.getElementById('keyStatus').className='api-ok'; document.getElementById('keyStatus').textContent='✓ salva'; }
   render();
   window.addEventListener('scroll', () => document.querySelector('header').style.boxShadow = scrollY>30?'0 2px 20px rgba(0,0,0,.08)':'');
 });
