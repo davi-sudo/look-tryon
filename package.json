@@ -1,5 +1,13 @@
 {
   "name": "stylefit",
   "version": "1.0.0",
-  "private": true
+  "private": true,
+  "description": "STYLEFIT - provador virtual de moda com IA",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env api/server.js",
+    "dev": "node --env-file-if-exists=.env --watch api/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

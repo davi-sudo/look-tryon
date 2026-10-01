@@ -26,6 +26,9 @@
     .api-bar { position:fixed; top:61px; left:0; right:0; z-index:190; background:var(--black); color:var(--white); padding:9px 40px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     .api-bar label { font-size:.65rem; letter-spacing:2px; text-transform:uppercase; opacity:.5; white-space:nowrap; }
     .api-fixed { font-size:.68rem; letter-spacing:2px; text-transform:uppercase; opacity:.85; white-space:nowrap; }
+    .keychecking { font-size:.62rem; letter-spacing:1px; text-transform:uppercase; opacity:.45; white-space:nowrap; }
+    .keychecking.ok { opacity:1; color:#7ee787; }
+    .keychecking.bad { opacity:1; color:#ff8f8f; }
     .api-bar input { flex:1; min-width:220px; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.25); color:var(--white); font-size:.72rem; padding:3px 0; outline:none; }
     .api-bar input::placeholder { opacity:.3; }
     .api-bar button { background:var(--white); color:var(--black); border:none; padding:5px 14px; font-size:.62rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
@@ -186,11 +189,9 @@
 
 <!-- API BAR -->
 <div class="api-bar">
-  <label>IA</label>
-  <span class="api-fixed">HuggingFace</span>
-  <input type="password" id="apiKey" placeholder="hf_... (huggingface.co/settings/tokens)" />
-  <button onclick="saveKey()">Salvar</button>
-  <span id="keyStatus"></span>
+  <label>Motor</label>
+  <span class="api-fixed">FLUX VTO</span>
+  <span id="keyStatus" class="keychecking">verificando...</span>
 </div>
 
 <!-- HERO -->
@@ -321,58 +322,64 @@ const products = [
   {
     id:1, name:"Oxford Social", cat:"Camisa", tag:"NEW",
     img:"https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a slim fit light blue oxford button shirt tucked into slim black chino pants, professional look, fashion editorial",
+    garment:"slim fit light blue oxford button-down shirt tucked into slim black chino pants",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a slim fit light blue oxford button-down shirt tucked into slim black chino pants. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Camisa Oxford azul claro slim fit manga longa dobrada no cotovelo + Calça chino preta slim. Camisa por dentro da calça. Caimento natural fotorrealista. Sem marca d'água."
   },
   {
     id:2, name:"Knit Listrado", cat:"Suéter", tag:"DESTAQUE",
     img:"https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a yellow mustard black white striped knit sweater over slim blue jeans, casual fashion editorial",
+    garment:"yellow mustard black and white striped knit sweater over slim blue jeans",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a yellow mustard black and white striped knit sweater over slim blue jeans. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Suéter tricô listrado amarelo mostarda + faixa preta + faixa branca dupla + parte inferior preta + Calça jeans slim azul médio. Suéter por fora. Caimento natural fotorrealista. Sem marca d'água."
   },
   {
     id:3, name:"Urban Cargo", cat:"Street", tag:"",
     img:"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a grey oversized hoodie and khaki cargo pants with side pockets, urban streetwear fashion",
+    garment:"grey oversized hoodie and khaki cargo pants with side pockets",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a grey oversized hoodie and khaki cargo pants with side pockets. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Moletom oversized cinza mescla com capuz + Calça cargo caqui com bolsos laterais fit relaxado. Moletom por fora. Caimento natural. Sem marca d'água."
   },
   {
     id:4, name:"Polo Premium", cat:"Smart Casual", tag:"",
     img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a clean white polo shirt and slim beige chino trousers, smart casual fashion editorial",
+    garment:"clean white polo shirt and slim beige chino trousers",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a clean white polo shirt and slim beige chino trousers. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Polo branca premium piquet manga curta + Calça alfaiataria bege slim. Polo por fora. Caimento limpo. Sem marca d'água."
   },
   {
     id:5, name:"Winter Blazer", cat:"Inverno", tag:"PREMIUM",
     img:"https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a black turtleneck under open grey plaid blazer and slim charcoal trousers, premium winter fashion",
+    garment:"black turtleneck under an open grey plaid blazer and slim charcoal trousers",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a black turtleneck under an open grey plaid blazer and slim charcoal trousers. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Gola rulê preta + Blazer xadrez cinza/preto aberto + Calça alfaiataria cinza chumbo slim. Camadas visíveis naturais. Sem marca d'água."
   },
   {
     id:6, name:"Linho Branco", cat:"Verão", tag:"SALE",
     img:"https://images.unsplash.com/photo-1488161628813-04466f872be2?w=600&h=800&fit=crop&crop=top&q=80",
-    hf:"wearing a white linen short sleeve shirt and navy blue bermuda shorts, summer resort fashion editorial",
+    garment:"white linen short sleeve shirt and navy blue bermuda shorts",
+    promptEn:"The person of image 1, maintaining exactly their face, identity, expression, body proportions, skin tone, hair and full-body pose, wearing a white linen short sleeve shirt and navy blue bermuda shorts. Preserve the shoes, personal accessories, background, lighting and camera angle from image 1. Photorealistic, natural draping, no added text, no watermark.",
     prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Camisa linho branco manga curta colarinho aberto + Bermuda sarja azul navy no joelho. Por fora, caimento leve. Sem marca d'água."
   }
 ];
 
 /* ─── STATE ─── */
-let selProduct = null, userB64 = null, userMime = null, resultUrl = null;
+let selProduct = null, userDataUrl = null, resultUrl = null;
 
-/* ─── API KEY ─── */
-function saveKey() {
-  const v = document.getElementById('apiKey').value.trim();
-  if (!v.startsWith('hf_') || v.length < 12) {
-    alert('Cole uma chave válida do HuggingFace (começa com hf_...).\n\nCrie em: huggingface.co/settings/tokens');
-    return;
+/* ─── API (chave vive no servidor, nunca no browser) ─── */
+const API = 'http://localhost:3000';
+
+async function checkHealth() {
+  const el = document.getElementById('keyStatus');
+  try {
+    const r = await fetch(API + '/api/health');
+    const d = await r.json();
+    if (d.configured) { el.className = 'keychecking ok'; el.textContent = '✓ pronto'; }
+    else { el.className = 'keychecking bad'; el.textContent = 'chave ausente no servidor'; }
+  } catch {
+    el.className = 'keychecking bad';
+    el.textContent = 'servidor offline — rode: npm start';
   }
-  localStorage.setItem('sf_key_hf', v);
-  document.getElementById('keyStatus').className = 'api-ok';
-  document.getElementById('keyStatus').textContent = '✓ salva';
-}
-
-function getKey() {
-  return localStorage.getItem('sf_key_hf') || document.getElementById('apiKey').value.trim() || null;
 }
 
 /* ─── RENDER ─── */
@@ -441,7 +448,7 @@ function resetDrawer() {
   setState('upload');
   document.getElementById('fileIn').value = '';
   document.getElementById('prev').style.display = 'none';
-  userB64 = null; resultUrl = null;
+  userDataUrl = null; resultUrl = null;
   document.getElementById('errMsg').className = 'err';
   document.getElementById('btnGen').disabled = true;
   if (selProduct) {
@@ -454,10 +461,9 @@ function resetDrawer() {
 function handleFile(e) {
   const f = e.target.files[0]; if (!f) return;
   if (!f.type.startsWith('image/')) { showErr('Selecione uma imagem.'); return; }
-  userMime = f.type;
   const r = new FileReader();
   r.onload = ev => {
-    userB64 = ev.target.result.split(',')[1];
+    userDataUrl = ev.target.result;
     document.getElementById('prev').src = ev.target.result;
     document.getElementById('prev').style.display = 'block';
     document.getElementById('errMsg').className = 'err';
@@ -467,7 +473,7 @@ function handleFile(e) {
 }
 
 function updateBtn() {
-  document.getElementById('btnGen').disabled = !(userB64 && selProduct);
+  document.getElementById('btnGen').disabled = !(userDataUrl && selProduct);
 }
 
 // drag & drop
@@ -481,79 +487,71 @@ uz.addEventListener('drop', e => {
 });
 
 /* ─── GENERATE ─── */
-const loadMsgs = ["Analisando sua silhueta...","Adaptando as peças ao seu corpo...","Ajustando iluminação e sombras...","Aplicando texturas do tecido...","Finalizando detalhes realistas..."];
+const loadMsgs = [
+  "Enviando sua foto...",
+  "FLUX esta aplicando o look...",
+  "Preservando rosto e pose...",
+  "Ajustando sombras e luz...",
+  "Finalizando texturas do tecido..."
+];
 
 async function generate() {
-  const key = getKey();
-  if (!key) { showErr('Configure sua API Key do HuggingFace na barra preta no topo.'); return; }
-  if (!userB64) { showErr('Envie sua foto primeiro.'); return; }
-  if (!selProduct) { showErr('Selecione um look no catálogo.'); return; }
+  if (!userDataUrl) { showErr('Envie sua foto primeiro.'); return; }
+  if (!selProduct) { showErr('Selecione um look no catalogo.'); return; }
 
   setState('loading');
   let mi = 0;
-  const iv = setInterval(() => { document.getElementById('loadMsg').textContent = loadMsgs[++mi % loadMsgs.length]; }, 2200);
+  const iv = setInterval(() => {
+    document.getElementById('loadMsg').textContent = loadMsgs[++mi % loadMsgs.length];
+  }, 3000);
 
   try {
-    await genHF(key);
+    await genTryOn();
     clearInterval(iv);
-  } catch(err) {
+  } catch (err) {
     clearInterval(iv);
     setState('upload');
-    showErr('❌ ' + err.message);
+    showErr(err.message);
   }
 }
 
-const HF_MODELS = ['timbrooks/instruct-pix2pix', 'yhyu13/instruct-pix2pix', 'diffusers/stable-diffusion-img2img'];
+async function genTryOn() {
+  document.getElementById('loadMsg').textContent = 'Enviando para o servidor local...';
 
-async function genHF(key) {
-  document.getElementById('loadMsg').textContent = 'Enviando para HuggingFace...';
-
-  const payload = {
-    inputs: userB64,
-    parameters: {
-      prompt: selProduct.hf,
-      negative_prompt: 'blurry, low quality, bad anatomy, deformed, extra limbs, cartoon, drawing',
-      num_inference_steps: 25,
-      image_guidance_scale: 1.5,
-      guidance_scale: 8
-    }
-  };
-
-  let lastErr = '';
-
-  for (const model of HF_MODELS) {
-    document.getElementById('loadMsg').textContent = `Processando com ${model}...`;
-
-    const isDiffusers = !model.includes('instruct-pix2pix');
-    const headers = { Authorization:`Bearer ${key}`, 'Content-Type':'application/json', 'X-Use-Cache':'false' };
-    const body = isDiffusers
-      ? { inputs: userB64, parameters: { ...payload.parameters, strength: 0.45 } }
-      : payload;
-
-    try {
-      const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-        method:'POST', headers, body: JSON.stringify(body)
-      });
-
-      if (res.status === 503) { lastErr = `[${model}] Modelo carregando. Aguarde ~20s e tente novamente.`; continue; }
-      if (res.status === 429) { lastErr = `[${model}] Limite de requisições atingido. Aguarde um pouco.`; continue; }
-      if (res.status === 402 || res.status === 403) { throw new Error('Chave recusada pelo HuggingFace. Verifique se o token tem permissão de inferência e se há créditos na conta.'); }
-
-      if (!res.ok) { const e = await res.json().catch(()=>({})); lastErr = `[${model}] ${e.error || 'HTTP ' + res.status}`; continue; }
-
-      const blob = await res.blob();
-      if (!blob.type.startsWith('image/')) { const t = await blob.text(); lastErr = `[${model}] Não retornou imagem: ` + t.slice(0,120); continue; }
-
-      resultUrl = await new Promise((r,rj) => { const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.onerror=rj; fr.readAsDataURL(blob); });
-      showResult();
-      return;
-
-    } catch(e) {
-      lastErr = `[${model}] ${e.message}`;
-    }
+  let res;
+  try {
+    res = await fetch(API + '/api/tryon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        image: userDataUrl,
+        garment: selProduct.garment,
+        prompt: selProduct.promptEn,
+        productName: selProduct.name
+      })
+    });
+  } catch {
+    throw new Error('Servidor offline. Rode "npm start" na pasta do projeto e recarregue a pagina.');
   }
 
-  throw new Error(lastErr + '\n\nSe persistir: huggingface.co/settings/tokens — crie um token do tipo "Read" e confira se o cartão tem saldo.');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `O servidor respondeu ${res.status}.`);
+  if (!data.image) throw new Error('A IA nao devolveu imagem. Tente novamente.');
+
+  document.getElementById('loadMsg').textContent = 'Baixando resultado...';
+  resultUrl = await toDataUrl(data.image);
+  showResult();
+}
+
+async function toDataUrl(url) {
+  const r = await fetch(url);
+  const blob = await r.blob();
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = e => res(e.target.result);
+    fr.onerror = rej;
+    fr.readAsDataURL(blob);
+  });
 }
 
 function showResult() {
@@ -578,8 +576,7 @@ function showErr(m) { const el=document.getElementById('errMsg'); el.textContent
 
 /* ─── INIT ─── */
 window.addEventListener('load', () => {
-  const k = localStorage.getItem('sf_key_hf');
-  if (k) { document.getElementById('apiKey').value=k; document.getElementById('keyStatus').className='api-ok'; document.getElementById('keyStatus').textContent='✓ salva'; }
+  checkHealth();
   render();
   window.addEventListener('scroll', () => document.querySelector('header').style.boxShadow = scrollY>30?'0 2px 20px rgba(0,0,0,.08)':'');
 });
