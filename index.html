@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STYLEFIT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --black:#0a0a0a; --white:#fff; --gray:#888; --light:#f5f5f3; --border:#e0e0e0; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'Inter',sans-serif; background:var(--white); color:var(--black); font-weight:300; overflow-x:hidden; }
+    ::-webkit-scrollbar { width:3px; } ::-webkit-scrollbar-thumb { background:var(--black); }
+
+    /* HEADER */
+    header { position:fixed; top:0; left:0; right:0; z-index:200; display:flex; align-items:center; justify-content:space-between; padding:18px 40px; background:rgba(255,255,255,0.96); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); }
+    .logo { font-family:'Cormorant Garamond',serif; font-size:1.4rem; font-weight:600; letter-spacing:8px; text-transform:uppercase; text-decoration:none; color:var(--black); }
+    nav { display:flex; gap:28px; }
+    nav a { font-size:0.68rem; letter-spacing:2px; text-transform:uppercase; text-decoration:none; color:var(--black); opacity:.7; transition:opacity .2s; }
+    nav a:hover { opacity:1; }
+    .h-icons { display:flex; gap:16px; }
+    .h-icon { background:none; border:none; font-size:.95rem; cursor:pointer; opacity:.6; }
+    .h-icon:hover { opacity:1; }
+
+    /* API BAR */
+    .api-bar { position:fixed; top:61px; left:0; right:0; z-index:190; background:var(--black); color:var(--white); padding:9px 40px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .api-bar label { font-size:.65rem; letter-spacing:2px; text-transform:uppercase; opacity:.5; white-space:nowrap; }
+    .api-bar select { background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.25); color:var(--white); font-size:.72rem; padding:3px 6px; cursor:pointer; outline:none; }
+    .api-bar select option { background:var(--black); }
+    .api-bar input { flex:1; min-width:220px; background:transparent; border:none; border-bottom:1px solid rgba(255,255,255,.25); color:var(--white); font-size:.72rem; padding:3px 0; outline:none; }
+    .api-bar input::placeholder { opacity:.3; }
+    .api-bar button { background:var(--white); color:var(--black); border:none; padding:5px 14px; font-size:.62rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
+    .api-ok { font-size:.62rem; color:#90ee90; white-space:nowrap; }
+
+    /* HERO */
+    .hero { height:100vh; display:grid; grid-template-columns:1fr 1fr; margin-top:100px; }
+    .hero-panel { position:relative; overflow:hidden; cursor:pointer; }
+    .hero-panel img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s cubic-bezier(.25,.46,.45,.94); }
+    .hero-panel:hover img { transform:scale(1.04); }
+    .hero-overlay { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.55) 0%,rgba(0,0,0,.05) 55%,transparent 100%); }
+    .hero-text { position:absolute; bottom:36px; left:32px; color:var(--white); z-index:2; }
+    .hero-text .tag { font-size:.6rem; letter-spacing:3px; text-transform:uppercase; opacity:.8; display:block; margin-bottom:8px; }
+    .hero-text h2 { font-family:'Cormorant Garamond',serif; font-size:2.4rem; font-weight:300; line-height:1.1; margin-bottom:14px; }
+    .hero-link { font-size:.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--white); text-decoration:none; border-bottom:1px solid rgba(255,255,255,.4); padding-bottom:2px; }
+
+    /* SECTION HEADER */
+    .sec-header { display:flex; align-items:baseline; justify-content:space-between; padding:60px 40px 28px; border-bottom:1px solid var(--border); }
+    .sec-header h2 { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:300; }
+    .sec-header span { font-size:.62rem; letter-spacing:2px; text-transform:uppercase; color:var(--gray); }
+
+    /* GRID */
+    .grid { display:grid; grid-template-columns:repeat(4,1fr); }
+    .card { position:relative; border-right:1px solid var(--border); border-bottom:1px solid var(--border); overflow:hidden; background:var(--white); }
+    .card:nth-child(4n) { border-right:none; }
+    .card-img { position:relative; height:460px; overflow:hidden; background:var(--light); }
+    .card-img img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .6s cubic-bezier(.25,.46,.45,.94); }
+    .card:hover .card-img img { transform:scale(1.05); }
+    .card-img::after { content:''; position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.3) 0%,transparent 50%); opacity:0; transition:opacity .4s; }
+    .card:hover .card-img::after { opacity:1; }
+
+    /* tag badge */
+    .badge { position:absolute; top:14px; left:14px; font-size:.58rem; letter-spacing:2px; text-transform:uppercase; padding:4px 10px; font-weight:500; z-index:2; }
+    .badge-new { background:var(--black); color:var(--white); }
+    .badge-sale { background:#e63946; color:var(--white); }
+    .badge-dest { background:var(--white); color:var(--black); border:1px solid var(--border); }
+
+    /* try btn — hover */
+    .try-btn { position:absolute; bottom:18px; left:50%; transform:translateX(-50%) translateY(8px); opacity:0; transition:all .3s cubic-bezier(.25,.46,.45,.94); z-index:10; white-space:nowrap; background:var(--white); border:none; padding:11px 26px; font-size:.62rem; letter-spacing:3px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; font-weight:500; box-shadow:0 6px 24px rgba(0,0,0,.18); display:flex; align-items:center; gap:8px; }
+    .card:hover .try-btn { opacity:1; transform:translateX(-50%) translateY(0); }
+    .try-dot { width:6px; height:6px; background:var(--black); border-radius:50%; animation:blink 1.4s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* card info */
+    .card-info { padding:18px 18px 22px; }
+    .card-cat { font-size:.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--gray); margin-bottom:5px; }
+    .card-name { font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-weight:400; margin-bottom:4px; }
+    .card-price { font-size:.78rem; color:var(--gray); }
+    .card-price strong { color:var(--black); font-weight:400; }
+
+    /* FAB */
+    .fab { position:fixed; bottom:32px; right:32px; z-index:300; display:flex; flex-direction:column; align-items:center; gap:6px; }
+    .fab-btn { width:54px; height:54px; background:var(--black); color:var(--white); border:none; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 28px rgba(0,0,0,.28); transition:transform .2s; position:relative; }
+    .fab-btn:hover { transform:scale(1.08); }
+    .fab-ring { position:absolute; inset:-5px; border:1.5px solid rgba(0,0,0,.15); border-radius:50%; animation:fabP 2s ease-out infinite; }
+    @keyframes fabP { 0%{transform:scale(1);opacity:.6} 100%{transform:scale(1.55);opacity:0} }
+    .fab-label { font-size:.52rem; letter-spacing:2px; text-transform:uppercase; background:var(--white); padding:3px 9px; border:1px solid var(--border); white-space:nowrap; }
+    .fab-badge { position:absolute; top:-3px; right:-3px; background:var(--white); color:var(--black); border-radius:50%; width:16px; height:16px; font-size:.5rem; font-weight:600; display:none; align-items:center; justify-content:center; border:1px solid var(--border); }
+
+    /* EDITORIAL STRIP */
+    .strip { padding:80px 40px; background:var(--black); color:var(--white); display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+    .strip h2 { font-family:'Cormorant Garamond',serif; font-size:3rem; font-weight:300; line-height:1.1; font-style:italic; }
+    .strip p { color:rgba(255,255,255,.5); font-size:.85rem; line-height:1.9; margin-bottom:28px; }
+    .strip a { color:var(--white); font-size:.62rem; letter-spacing:3px; text-transform:uppercase; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.3); padding-bottom:3px; cursor:pointer; }
+
+    /* FOOTER */
+    footer { padding:36px 40px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .footer-logo { font-family:'Cormorant Garamond',serif; font-size:.95rem; font-weight:600; letter-spacing:6px; text-transform:uppercase; }
+    footer p { font-size:.62rem; color:var(--gray); }
+
+    /* OVERLAY + DRAWER */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:500; }
+    .overlay.active { display:flex; justify-content:flex-end; }
+    .drawer { background:var(--white); width:460px; height:100%; overflow-y:auto; padding:44px 36px; position:relative; animation:slideIn .38s cubic-bezier(.25,.46,.45,.94); }
+    @keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+    .d-close { position:absolute; top:20px; right:20px; background:none; border:none; font-size:.9rem; cursor:pointer; color:var(--gray); width:30px; height:30px; display:flex; align-items:center; justify-content:center; }
+    .d-close:hover { color:var(--black); }
+    .d-eye { font-size:.58rem; letter-spacing:3px; text-transform:uppercase; color:var(--gray); margin-bottom:8px; }
+    .drawer h2 { font-family:'Cormorant Garamond',serif; font-size:1.7rem; font-weight:300; margin-bottom:6px; line-height:1.2; }
+    .drawer > p { font-size:.78rem; color:var(--gray); margin-bottom:28px; line-height:1.7; }
+
+    /* selected look */
+    .sel-look { display:none; align-items:center; gap:14px; padding:14px; background:var(--light); margin-bottom:28px; border-left:2px solid var(--black); }
+    .sel-look.on { display:flex; }
+    .sel-thumb { width:48px; height:48px; object-fit:cover; }
+    .sel-name { font-family:'Cormorant Garamond',serif; font-size:.95rem; display:block; margin-bottom:2px; }
+    .sel-cat { font-size:.6rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); }
+    .sel-x { background:none; border:none; cursor:pointer; color:var(--gray); margin-left:auto; font-size:.8rem; }
+    .no-look { font-size:.72rem; color:var(--gray); padding:12px 14px; background:var(--light); margin-bottom:28px; line-height:1.6; }
+
+    /* upload */
+    .upload-z { border:1px solid var(--border); padding:36px 20px; text-align:center; cursor:pointer; position:relative; transition:border-color .2s,background .2s; margin-bottom:14px; }
+    .upload-z:hover,.upload-z.drag { border-color:var(--black); background:var(--light); }
+    .upload-z input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+    .upload-z span { font-size:1.8rem; display:block; margin-bottom:10px; opacity:.25; }
+    .upload-z h4 { font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:300; margin-bottom:4px; }
+    .upload-z small { font-size:.65rem; color:var(--gray); }
+    .upload-prev { width:100%; max-height:240px; object-fit:contain; margin-top:14px; display:none; border:1px solid var(--border); }
+
+    /* tips */
+    .tips { display:flex; gap:6px; margin-bottom:28px; }
+    .tip { flex:1; padding:12px 6px; background:var(--light); text-align:center; }
+    .tip span { font-size:1rem; display:block; margin-bottom:3px; }
+    .tip p { font-size:.6rem; color:var(--gray); line-height:1.5; }
+
+    /* buttons */
+    .btn-p { width:100%; background:var(--black); color:var(--white); border:none; padding:16px; font-size:.65rem; letter-spacing:3px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; transition:opacity .2s; margin-top:6px; }
+    .btn-p:hover:not(:disabled) { opacity:.8; }
+    .btn-p:disabled { opacity:.3; cursor:not-allowed; }
+    .btn-o { width:100%; background:var(--white); color:var(--black); border:1px solid var(--border); padding:13px; font-size:.6rem; letter-spacing:2px; text-transform:uppercase; cursor:pointer; font-family:'Inter',sans-serif; transition:border-color .2s; margin-top:6px; }
+    .btn-o:hover { border-color:var(--black); }
+
+    /* loading */
+    .loading { display:none; text-align:center; padding:56px 0; }
+    .loading.on { display:block; }
+    .loader { width:30px; height:30px; border:1.5px solid var(--border); border-top-color:var(--black); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 20px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .loading h4 { font-family:'Cormorant Garamond',serif; font-size:1.05rem; font-weight:300; margin-bottom:6px; }
+    .loading p { font-size:.7rem; color:var(--gray); }
+    .prog { height:1px; background:var(--border); margin:20px 0; overflow:hidden; }
+    .prog::after { content:''; display:block; height:100%; width:40%; background:var(--black); animation:prog 1.1s ease-in-out infinite; }
+    @keyframes prog { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+
+    /* result */
+    .result { display:none; }
+    .result.on { display:block; }
+    .r-eye { font-size:.58rem; letter-spacing:3px; text-transform:uppercase; color:var(--gray); margin-bottom:6px; }
+    .r-title { font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:300; margin-bottom:20px; }
+    .r-img { width:100%; display:block; border:1px solid var(--border); margin-bottom:16px; }
+    .r-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:6px; }
+
+    /* error */
+    .err { display:none; font-size:.72rem; color:#b00; padding:12px 14px; background:#fff5f5; border:1px solid #ffcccc; margin-top:10px; line-height:1.6; }
+    .err.on { display:block; }
+
+    /* responsive */
+    @media(max-width:1024px) { .grid{grid-template-columns:repeat(2,1fr)} .card:nth-child(4n){border-right:1px solid var(--border)} .card:nth-child(2n){border-right:none} }
+    @media(max-width:768px) { header{padding:14px 18px} nav{display:none} .api-bar{padding:9px 18px} .hero{grid-template-columns:1fr;height:auto} .hero-panel{height:50vh} .grid{grid-template-columns:repeat(2,1fr)} .sec-header{padding:40px 18px 20px} .strip{grid-template-columns:1fr;gap:36px;padding:56px 18px} .drawer{width:100%} .fab{bottom:20px;right:16px} }
+    @media(max-width:480px) { .grid{grid-template-columns:1fr} .card:nth-child(2n){border-right:1px solid var(--border)} }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="logo">Stylefit</a>
+  <nav>
+    <a href="#">Homem</a>
+    <a href="#">Mulher</a>
+    <a href="#">Looks</a>
+    <a href="#">Sale</a>
+  </nav>
+  <div class="h-icons">
+    <button class="h-icon">🔍</button>
+    <button class="h-icon" onclick="openDrawer()">☰</button>
+  </div>
+</header>
+
+<!-- API BAR -->
+<div class="api-bar">
+  <label>IA</label>
+  <select id="provider" onchange="onProviderChange()">
+    <option value="gemini">Gemini</option>
+    <option value="hf">HuggingFace</option>
+  </select>
+  <input type="password" id="apiKey" placeholder="Cole sua chave aqui..." />
+  <button onclick="saveKey()">Salvar</button>
+  <span id="keyStatus"></span>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-panel" onclick="openDrawer(2)">
+    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=900&h=1200&fit=crop&crop=top&q=85" alt="Look Casual" onerror="this.src='https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=900&h=1200&fit=crop&q=85'" />
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <span class="tag">Nova Coleção</span>
+      <h2>Looks que<br/>combinam com você</h2>
+      <a class="hero-link">Experimentar agora</a>
+    </div>
+  </div>
+  <div class="hero-panel" onclick="openDrawer(5)">
+    <img src="https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=900&h=1200&fit=crop&crop=top&q=85" alt="Look Premium" onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=1200&fit=crop&q=85'" />
+    <div class="hero-overlay"></div>
+    <div class="hero-text">
+      <span class="tag">Premium</span>
+      <h2>Estilo<br/>sem fronteiras</h2>
+      <a class="hero-link">Ver coleção</a>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION HEADER -->
+<div class="sec-header">
+  <h2>Coleção</h2>
+  <span>6 looks disponíveis</span>
+</div>
+
+<!-- GRID -->
+<div class="grid" id="grid"></div>
+
+<!-- STRIP -->
+<div class="strip">
+  <div>
+    <h2>Experimente<br/>antes de<br/>comprar.</h2>
+  </div>
+  <div>
+    <p>Nossa tecnologia de provador virtual com Inteligência Artificial permite que você veja qualquer peça no seu próprio corpo antes de qualquer decisão de compra.</p>
+    <a onclick="openDrawer()">Experimentar agora →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">Stylefit</span>
+  <p>Powered by Gemini AI & HuggingFace · Protótipo</p>
+</footer>
+
+<!-- FAB -->
+<div class="fab">
+  <span class="fab-label">Experimentar</span>
+  <button class="fab-btn" onclick="openDrawer()" title="Provador virtual">
+    <div class="fab-ring"></div>
+    <span id="fabIcon">✦</span>
+    <span class="fab-badge" id="fabBadge">1</span>
+  </button>
+</div>
+
+<!-- DRAWER -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="drawer">
+    <button class="d-close" onclick="closeDrawer()">✕</button>
+
+    <!-- UPLOAD -->
+    <div id="sUpload">
+      <div class="d-eye">Provador Virtual IA</div>
+      <h2>Experimente<br/>o look</h2>
+      <p>Escolha um look e envie sua foto de corpo inteiro para ver como ficaria.</p>
+
+      <div class="sel-look" id="selLook">
+        <img class="sel-thumb" id="selThumb" src="" alt="" />
+        <div>
+          <span class="sel-name" id="selName">—</span>
+          <span class="sel-cat" id="selCat">—</span>
+        </div>
+        <button class="sel-x" onclick="clearSel()">✕</button>
+      </div>
+
+      <div class="no-look" id="noLook">
+        ↙ Escolha um look clicando em <strong>"✦ Experimentar"</strong> em qualquer produto abaixo.
+      </div>
+
+      <div class="upload-z" id="uploadZ">
+        <input type="file" id="fileIn" accept="image/*" onchange="handleFile(event)" />
+        <span>↑</span>
+        <h4>Envie sua foto</h4>
+        <small>Corpo inteiro · Frontal · Boa iluminação</small>
+        <img class="upload-prev" id="prev" />
+      </div>
+
+      <div class="tips">
+        <div class="tip"><span>🧍</span><p>Corpo inteiro</p></div>
+        <div class="tip"><span>💡</span><p>Boa luz</p></div>
+        <div class="tip"><span>🏳️</span><p>Fundo neutro</p></div>
+      </div>
+
+      <button class="btn-p" id="btnGen" onclick="generate()" disabled>✦ &nbsp;Gerar prova virtual</button>
+      <div class="err" id="errMsg"></div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading" id="sLoading">
+      <div class="loader"></div>
+      <h4>A IA está trabalhando</h4>
+      <div class="prog"></div>
+      <p id="loadMsg">Analisando sua silhueta...</p>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result" id="sResult">
+      <div class="r-eye">Resultado</div>
+      <div class="r-title" id="rTitle">Seu look está pronto</div>
+      <img class="r-img" id="rImg" src="" alt="Resultado" />
+      <div class="r-btns">
+        <button class="btn-p" onclick="dlResult()">↓ Baixar</button>
+        <button class="btn-o" onclick="waShare()">WhatsApp</button>
+      </div>
+      <button class="btn-o" onclick="tryAgain()">← Tentar novamente</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── PRODUCTS ─── */
+const products = [
+  {
+    id:1, name:"Oxford Social", cat:"Camisa", tag:"NEW",
+    img:"https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a slim fit light blue oxford button shirt tucked into slim black chino pants, professional look, fashion editorial",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Camisa Oxford azul claro slim fit manga longa dobrada no cotovelo + Calça chino preta slim. Camisa por dentro da calça. Caimento natural fotorrealista. Sem marca d'água."
+  },
+  {
+    id:2, name:"Knit Listrado", cat:"Suéter", tag:"DESTAQUE",
+    img:"https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a yellow mustard black white striped knit sweater over slim blue jeans, casual fashion editorial",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Suéter tricô listrado amarelo mostarda + faixa preta + faixa branca dupla + parte inferior preta + Calça jeans slim azul médio. Suéter por fora. Caimento natural fotorrealista. Sem marca d'água."
+  },
+  {
+    id:3, name:"Urban Cargo", cat:"Street", tag:"",
+    img:"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a grey oversized hoodie and khaki cargo pants with side pockets, urban streetwear fashion",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Moletom oversized cinza mescla com capuz + Calça cargo caqui com bolsos laterais fit relaxado. Moletom por fora. Caimento natural. Sem marca d'água."
+  },
+  {
+    id:4, name:"Polo Premium", cat:"Smart Casual", tag:"",
+    img:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a clean white polo shirt and slim beige chino trousers, smart casual fashion editorial",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Polo branca premium piquet manga curta + Calça alfaiataria bege slim. Polo por fora. Caimento limpo. Sem marca d'água."
+  },
+  {
+    id:5, name:"Winter Blazer", cat:"Inverno", tag:"PREMIUM",
+    img:"https://images.unsplash.com/photo-1490578474895-699cd4e2cf59?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a black turtleneck under open grey plaid blazer and slim charcoal trousers, premium winter fashion",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Gola rulê preta + Blazer xadrez cinza/preto aberto + Calça alfaiataria cinza chumbo slim. Camadas visíveis naturais. Sem marca d'água."
+  },
+  {
+    id:6, name:"Linho Branco", cat:"Verão", tag:"SALE",
+    img:"https://images.unsplash.com/photo-1488161628813-04466f872be2?w=600&h=800&fit=crop&crop=top&q=80",
+    hf:"wearing a white linen short sleeve shirt and navy blue bermuda shorts, summer resort fashion editorial",
+    prompt:"Atue como editor de imagens profissional hiper-realista. Preserve TUDO da pessoa (rosto, pose, calçados, fundo). Substitua APENAS as roupas por: Camisa linho branco manga curta colarinho aberto + Bermuda sarja azul navy no joelho. Por fora, caimento leve. Sem marca d'água."
+  }
+];
+
+/* ─── STATE ─── */
+let selProduct = null, userB64 = null, userMime = null, resultUrl = null;
+
+/* ─── API KEY ─── */
+function onProviderChange() {
+  const p = document.getElementById('provider').value;
+  document.getElementById('apiKey').placeholder = p === 'gemini'
+    ? 'AIzaSy... (aistudio.google.com/apikey)'
+    : 'hf_... (huggingface.co/settings/tokens)';
+  document.getElementById('apiKey').value = '';
+  document.getElementById('keyStatus').textContent = '';
+}
+
+function saveKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  const p = document.getElementById('provider').value;
+  if (!v || v.length < 8) { alert('Cole uma chave válida.'); return; }
+  localStorage.setItem('sf_provider', p);
+  localStorage.setItem('sf_key_' + p, v);
+  document.getElementById('keyStatus').className = 'api-ok';
+  document.getElementById('keyStatus').textContent = '✓ salva';
+}
+
+function getKey() {
+  const p = document.getElementById('provider').value;
+  return localStorage.getItem('sf_key_' + p) || document.getElementById('apiKey').value.trim() || null;
+}
+
+/* ─── RENDER ─── */
+function render() {
+  document.getElementById('grid').innerHTML = products.map(p => `
+    <div class="card">
+      ${p.tag ? `<div class="badge badge-${p.tag==='NEW'||p.tag==='PREMIUM'?'new':p.tag==='SALE'?'sale':'dest'}">${p.tag}</div>` : ''}
+      <div class="card-img">
+        <img src="${p.img}" alt="${p.name}" loading="lazy"
+          onerror="this.onerror=null;this.parentElement.style.background='#f0f0f0';this.style.display='none'" />
+        <button class="try-btn" onclick="openDrawer(${p.id})">
+          <span class="try-dot"></span> Experimentar
+        </button>
+      </div>
+      <div class="card-info">
+        <div class="card-cat">${p.cat}</div>
+        <div class="card-name">${p.name}</div>
+        <div class="card-price"><strong>${p.price}</strong> · 3x sem juros</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ─── DRAWER ─── */
+function openDrawer(id) {
+  resetDrawer();
+  if (id) { const p = products.find(x => x.id === id); if (p) selectProduct(p); }
+  document.getElementById('overlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeDrawer(); }
+
+function selectProduct(p) {
+  selProduct = p;
+  document.getElementById('selThumb').src = p.img;
+  document.getElementById('selName').textContent = p.name;
+  document.getElementById('selCat').textContent = p.cat;
+  document.getElementById('selLook').classList.add('on');
+  document.getElementById('noLook').style.display = 'none';
+  document.getElementById('fabBadge').style.display = 'flex';
+  document.getElementById('fabIcon').textContent = '✓';
+  updateBtn();
+}
+
+function clearSel() {
+  selProduct = null;
+  document.getElementById('selLook').classList.remove('on');
+  document.getElementById('noLook').style.display = 'block';
+  document.getElementById('fabBadge').style.display = 'none';
+  document.getElementById('fabIcon').textContent = '✦';
+  updateBtn();
+}
+
+function setState(s) {
+  document.getElementById('sUpload').style.display = s==='upload'?'block':'none';
+  document.getElementById('sLoading').className = s==='loading'?'loading on':'loading';
+  document.getElementById('sResult').className = s==='result'?'result on':'result';
+}
+
+function resetDrawer() {
+  setState('upload');
+  document.getElementById('fileIn').value = '';
+  document.getElementById('prev').style.display = 'none';
+  userB64 = null; resultUrl = null;
+  document.getElementById('errMsg').className = 'err';
+  document.getElementById('btnGen').disabled = true;
+  if (selProduct) {
+    document.getElementById('selLook').classList.add('on');
+    document.getElementById('noLook').style.display = 'none';
+  }
+}
+
+/* ─── FILE ─── */
+function handleFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  if (!f.type.startsWith('image/')) { showErr('Selecione uma imagem.'); return; }
+  userMime = f.type;
+  const r = new FileReader();
+  r.onload = ev => {
+    userB64 = ev.target.result.split(',')[1];
+    document.getElementById('prev').src = ev.target.result;
+    document.getElementById('prev').style.display = 'block';
+    document.getElementById('errMsg').className = 'err';
+    updateBtn();
+  };
+  r.readAsDataURL(f);
+}
+
+function updateBtn() {
+  document.getElementById('btnGen').disabled = !(userB64 && selProduct);
+}
+
+// drag & drop
+const uz = document.getElementById('uploadZ');
+uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+uz.addEventListener('drop', e => {
+  e.preventDefault(); uz.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f) { const dt = new DataTransfer(); dt.items.add(f); document.getElementById('fileIn').files = dt.files; handleFile({target:{files:[f]}}); }
+});
+
+/* ─── GENERATE ─── */
+const loadMsgs = ["Analisando sua silhueta...","Adaptando as peças ao seu corpo...","Ajustando iluminação e sombras...","Aplicando texturas do tecido...","Finalizando detalhes realistas..."];
+
+async function generate() {
+  const key = getKey();
+  const prov = document.getElementById('provider').value;
+  if (!key) { showErr('Configure sua API Key na barra preta no topo.'); return; }
+  if (!userB64) { showErr('Envie sua foto primeiro.'); return; }
+  if (!selProduct) { showErr('Selecione um look no catálogo.'); return; }
+
+  setState('loading');
+  let mi = 0;
+  const iv = setInterval(() => { document.getElementById('loadMsg').textContent = loadMsgs[++mi % loadMsgs.length]; }, 2200);
+
+  try {
+    if (prov === 'hf') {
+      await genHF(key);
+    } else {
+      await genGemini(key);
+    }
+    clearInterval(iv);
+  } catch(err) {
+    clearInterval(iv);
+    setState('upload');
+    showErr('❌ ' + err.message);
+  }
+}
+
+async function genHF(key) {
+  document.getElementById('loadMsg').textContent = 'Enviando para HuggingFace...';
+  const res = await fetch('https://api-inference.huggingface.co/models/timbrooks/instruct-pix2pix', {
+    method:'POST',
+    headers:{ Authorization:`Bearer ${key}`, 'Content-Type':'application/json', 'x-wait-for-model':'true', 'X-Use-Cache':'false' },
+    body: JSON.stringify({
+      inputs: userB64,
+      parameters: { prompt: selProduct.hf, negative_prompt:'blurry, low quality, bad anatomy', num_inference_steps:25, image_guidance_scale:1.5, guidance_scale:8 }
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error('HuggingFace: ' + (e.error||'Modelo ocupado. Aguarde 30s e tente novamente.')); }
+  const blob = await res.blob();
+  if (!blob.type.startsWith('image/')) { const t = await blob.text(); throw new Error('HF não retornou imagem: ' + t.slice(0,120)); }
+  resultUrl = await new Promise((r,rj) => { const fr=new FileReader(); fr.onload=e=>r(e.target.result); fr.onerror=rj; fr.readAsDataURL(blob); });
+  showResult();
+}
+
+async function genGemini(key) {
+  const models = ['gemini-2.0-flash-exp','gemini-2.0-flash-preview-image-generation'];
+  let lastErr = '';
+  for (const m of models) {
+    document.getElementById('loadMsg').textContent = `Processando com ${m}...`;
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${key}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          contents:[{parts:[
+            {text: selProduct.prompt},
+            {inline_data:{mime_type:userMime, data:userB64}},
+            {text:'Esta é a foto da pessoa. Gere a imagem com o look aplicado.'}
+          ]}],
+          generationConfig:{responseModalities:['TEXT','IMAGE'],temperature:0.35,topP:0.9}
+        })
+      });
+      if (!res.ok) { const e=await res.json(); lastErr=`[${m}] ${e.error?.message||'HTTP '+res.status}`; continue; }
+      const data = await res.json();
+      const parts = data.candidates?.[0]?.content?.parts||[];
+      for (const pt of parts) {
+        if (pt.inline_data?.mime_type?.startsWith('image/')) {
+          resultUrl = `data:${pt.inline_data.mime_type};base64,${pt.inline_data.data}`;
+          showResult(); return;
+        }
+      }
+      lastErr = `[${m}] IA não gerou imagem`;
+    } catch(e) { lastErr = `[${m}] ${e.message}`; }
+  }
+  throw new Error(lastErr || 'Todos os modelos falharam. Verifique a API Key e a fatura do projeto.');
+}
+
+function showResult() {
+  document.getElementById('rImg').src = resultUrl;
+  document.getElementById('rTitle').textContent = selProduct.name + ' — seu look';
+  setState('result');
+}
+
+/* ─── ACTIONS ─── */
+function dlResult() {
+  if (!resultUrl) return;
+  const a = document.createElement('a');
+  a.href = resultUrl;
+  a.download = `stylefit-${selProduct?.name.replace(/\s+/g,'-').toLowerCase()}.png`;
+  a.click();
+}
+function waShare() {
+  window.open(`https://wa.me/?text=${encodeURIComponent(`Olha como eu ficaria com "${selProduct?.name}" da STYLEFIT! 🔥 ${selProduct?.price}`)}`, '_blank');
+}
+function tryAgain() { resultUrl=null; setState('upload'); }
+function showErr(m) { const el=document.getElementById('errMsg'); el.textContent=m; el.className='err on'; }
+
+/* ─── INIT ─── */
+window.addEventListener('load', () => {
+  const savedP = localStorage.getItem('sf_provider');
+  if (savedP) {
+    document.getElementById('provider').value = savedP;
+    const k = localStorage.getItem('sf_key_' + savedP);
+    if (k) { document.getElementById('apiKey').value=k; document.getElementById('keyStatus').className='api-ok'; document.getElementById('keyStatus').textContent='✓ salva'; }
+  }
+  onProviderChange();
+  if (savedP) document.getElementById('provider').value = savedP;
+  render();
+  window.addEventListener('scroll', () => document.querySelector('header').style.boxShadow = scrollY>30?'0 2px 20px rgba(0,0,0,.08)':'');
+});
+</script>
+</body>
+</html>
